@@ -16,13 +16,13 @@ export const detectWallets = (): WalletInfo[] => {
   const wallets: WalletInfo[] = [
     {
       name: 'MetaMask',
-      icon: 'https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg',
+      icon: 'https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg',
       installed: !!(window as any).ethereum?.isMetaMask,
       provider: (window as any).ethereum
     },
     {
       name: 'Trust Wallet',
-      icon: 'https://trustwallet.com/assets/images/media/assets/trust_platform.svg',
+      icon: 'https://seeklogo.com/images/T/trust-wallet-token-logo-FB6F8A6D0E-seeklogo.com.png',
       installed: !!(window as any).ethereum?.isTrust,
       provider: (window as any).ethereum
     },

@@ -25,12 +25,12 @@ const PaymentPage: React.FC = () => {
     }
   }, [walletState]);
 
-  // Auto-dismiss error after 5 seconds
+  // Auto-dismiss error after 10 seconds
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
         setError(null);
-      }, 5000);
+      }, 10000);
 
       return () => clearTimeout(timer);
     }
@@ -180,7 +180,7 @@ const PaymentPage: React.FC = () => {
       {/* Fixed Position Error Message */}
       {error && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4">
-          <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-2xl shadow-2xl p-6 animate-pulse">
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-2xl shadow-2xl p-6">
             <div className="flex items-start space-x-4">
               <div className="flex-shrink-0">
                 <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
@@ -215,7 +215,7 @@ const PaymentPage: React.FC = () => {
                   </p>
                 )}
                 <div className="mt-3 text-xs text-red-500">
-                  This message will disappear in 5 seconds
+                  This message will disappear in 10 seconds
                 </div>
               </div>
             </div>
@@ -383,11 +383,11 @@ const PaymentPage: React.FC = () => {
                           className="w-full flex items-center justify-between p-5 bg-white border border-gray-200 rounded-2xl hover:border-blue-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md transform hover:scale-[1.02]"
                         >
                           <div className="flex items-center space-x-4">
-                            <div className="w-12 h-12 bg-gradient-to-r from-gray-100 to-gray-200 rounded-xl flex items-center justify-center p-2">
+                            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center p-2 shadow-sm border border-gray-100">
                               <img 
                                 src={wallet.icon} 
                                 alt={`${wallet.name} logo`}
-                                className="w-8 h-8 object-contain"
+                                className="w-8 h-8 object-contain filter"
                                 onError={(e) => {
                                   // Fallback to emoji if image fails to load
                                   const target = e.target as HTMLImageElement;
@@ -430,11 +430,13 @@ const PaymentPage: React.FC = () => {
                           rel="noopener noreferrer"
                           className="inline-flex items-center space-x-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors"
                         >
-                          <img 
-                            src="https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg" 
-                            alt="MetaMask"
-                            className="w-5 h-5"
-                          />
+                          <div className="w-5 h-5 bg-white rounded-sm flex items-center justify-center">
+                            <img 
+                              src="https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg" 
+                              alt="MetaMask"
+                              className="w-4 h-4 object-contain"
+                            />
+                          </div>
                           <span>Install MetaMask</span>
                         </a>
                         <a
@@ -443,11 +445,13 @@ const PaymentPage: React.FC = () => {
                           rel="noopener noreferrer"
                           className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
                         >
-                          <img 
-                            src="https://trustwallet.com/assets/images/media/assets/trust_platform.svg" 
-                            alt="Trust Wallet"
-                            className="w-5 h-5"
-                          />
+                          <div className="w-5 h-5 bg-white rounded-sm flex items-center justify-center">
+                            <img 
+                              src="https://trustwallet.com/assets/images/media/assets/trust_platform.svg" 
+                              alt="Trust Wallet"
+                              className="w-4 h-4 object-contain"
+                            />
+                          </div>
                           <span>Install Trust Wallet</span>
                         </a>
                       </div>
