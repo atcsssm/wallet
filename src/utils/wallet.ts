@@ -13,20 +13,38 @@ const USDT_ABI = [
 ];
 
 export const detectWallets = (): WalletInfo[] => {
+  const ethereum = (window as any).ethereum;
+  
   const wallets: WalletInfo[] = [
     {
       name: 'MetaMask',
       icon: 'https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg',
-      installed: !!(window as any).ethereum?.isMetaMask,
-      provider: (window as any).ethereum
+      installed: !!(ethereum?.isMetaMask),
+      provider: ethereum?.isMetaMask ? ethereum : null
     },
     {
       name: 'Trust Wallet',
       icon: 'https://seeklogo.com/images/T/trust-wallet-token-logo-FB6F8A6D0E-seeklogo.com.png',
-      installed: !!(window as any).ethereum?.isTrust,
-      provider: (window as any).ethereum
+      installed: !!(ethereum?.isTrust || ethereum?.isTrustWallet),
+      provider: (ethereum?.isTrust || ethereum?.isTrustWallet) ? ethereum : null
     },
   ];
+
+  // Handle multiple wallet providers if available
+  if (ethereum?.providers && Array.isArray(ethereum.providers)) {
+    const metamaskProvider = ethereum.providers.find((p: any) => p.isMetaMask);
+    const trustProvider = ethereum.providers.find((p: any) => p.isTrust || p.isTrustWallet);
+    
+    if (metamaskProvider) {
+      wallets[0].provider = metamaskProvider;
+      wallets[0].installed = true;
+    }
+    
+    if (trustProvider) {
+      wallets[1].provider = trustProvider;
+      wallets[1].installed = true;
+    }
+  }
 
   return wallets;
 };
@@ -36,9 +54,12 @@ export const connectWallet = async (wallet: WalletInfo): Promise<WalletState> =>
     throw new Error(`${wallet.name} is not installed`);
   }
 
+  // Use the specific wallet provider
+  const provider = wallet.provider;
+
   try {
     // Request account access
-    const accounts = await wallet.provider.request({
+    const accounts = await provider.request({
       method: 'eth_requestAccounts'
     });
 
@@ -48,7 +69,7 @@ export const connectWallet = async (wallet: WalletInfo): Promise<WalletState> =>
 
     // Switch to BSC Testnet
     try {
-      await wallet.provider.request({
+      await provider.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: TESTNET_CONFIG.chainId }]
       });
@@ -56,7 +77,7 @@ export const connectWallet = async (wallet: WalletInfo): Promise<WalletState> =>
       // If network doesn't exist, add it
       if (switchError.code === 4902) {
         try {
-          await wallet.provider.request({
+          await provider.request({
             method: 'wallet_addEthereumChain',
             params: [TESTNET_CONFIG]
           });
@@ -70,16 +91,16 @@ export const connectWallet = async (wallet: WalletInfo): Promise<WalletState> =>
       }
     }
 
-    const provider = new BrowserProvider(wallet.provider);
-    const signer = await provider.getSigner();
+    const ethersProvider = new BrowserProvider(provider);
+    const signer = await ethersProvider.getSigner();
     const address = await signer.getAddress();
     
     // Get BNB balance
-    const balance = await provider.getBalance(address);
+    const balance = await ethersProvider.getBalance(address);
     const balanceInBNB = formatEther(balance);
     
     // Verify we're on the correct network
-    const network = await provider.getNetwork();
+    const network = await ethersProvider.getNetwork();
     if (network.chainId !== 97n) { // BSC Testnet chain ID as BigInt
       throw new Error('Please switch to BSC Testnet network in your wallet.');
     }
@@ -89,7 +110,7 @@ export const connectWallet = async (wallet: WalletInfo): Promise<WalletState> =>
       address,
       balance: balanceInBNB,
       chainId: network.chainId.toString(),
-      provider
+      provider: ethersProvider
     };
   } catch (error: any) {
     console.error('Failed to connect wallet:', error);
