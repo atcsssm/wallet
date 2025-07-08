@@ -25,6 +25,16 @@ const PaymentPage: React.FC = () => {
     }
   }, [walletState]);
 
+  // Auto-dismiss error after 5 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
   const loadUSDTBalance = async () => {
     if (!walletState?.provider || !walletState.address) return;
     
@@ -167,6 +177,52 @@ const PaymentPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8 px-4">
+      {/* Fixed Position Error Message */}
+      {error && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4">
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-2xl shadow-2xl p-6 animate-pulse">
+            <div className="flex items-start space-x-4">
+              <div className="flex-shrink-0">
+                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                  <AlertCircle className="w-5 h-5 text-red-600" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-bold text-red-800 text-lg">Oops! Something went wrong</h4>
+                  <button
+                    onClick={() => setError(null)}
+                    className="text-red-600 hover:text-red-800 font-bold text-xl leading-none"
+                    title="Close"
+                  >
+                    ×
+                  </button>
+                </div>
+                <p className="text-red-700">{error}</p>
+                {error.includes('USDT') && (
+                  <p className="text-red-600 text-sm mt-3 bg-red-100 p-3 rounded-lg">
+                    💡 Tip: Make sure you have enough USDT and BNB for gas fees in your wallet.
+                  </p>
+                )}
+                {error.includes('network') && (
+                  <p className="text-red-600 text-sm mt-3 bg-red-100 p-3 rounded-lg">
+                    💡 Tip: Check your internet connection and wallet network settings.
+                  </p>
+                )}
+                {error.includes('rejected') && (
+                  <p className="text-red-600 text-sm mt-3 bg-red-100 p-3 rounded-lg">
+                    💡 Tip: You can try the payment again when ready.
+                  </p>
+                )}
+                <div className="mt-3 text-xs text-red-500">
+                  This message will disappear in 5 seconds
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -186,37 +242,6 @@ const PaymentPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Error Display - At Top */}
-        {error && (
-          <div className="mb-8 p-6 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-2xl shadow-lg">
-            <div className="flex items-start space-x-4">
-              <div className="flex-shrink-0">
-                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                  <AlertCircle className="w-5 h-5 text-red-600" />
-                </div>
-              </div>
-              <div className="flex-1">
-                <h4 className="font-bold text-red-800 mb-2 text-lg">Oops! Something went wrong</h4>
-                <p className="text-red-700">{error}</p>
-                {error.includes('USDT') && (
-                  <p className="text-red-600 text-sm mt-3 bg-red-100 p-3 rounded-lg">
-                    💡 Tip: Make sure you have enough USDT and BNB for gas fees in your wallet.
-                  </p>
-                )}
-                {error.includes('network') && (
-                  <p className="text-red-600 text-sm mt-3 bg-red-100 p-3 rounded-lg">
-                    💡 Tip: Check your internet connection and wallet network settings.
-                  </p>
-                )}
-                {error.includes('rejected') && (
-                  <p className="text-red-600 text-sm mt-3 bg-red-100 p-3 rounded-lg">
-                    💡 Tip: You can try the payment again when ready.
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Main Payment Card - Single Grid */}
         <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8 mb-8">
